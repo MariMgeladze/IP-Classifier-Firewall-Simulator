@@ -11,9 +11,5 @@
 - Private vs Public IP მისამართის ტიპის განსაზღვრა (RFC 1918 სტანდარტით).
 
 ### 2. Firewall Simulator (მუშავდება...)
-- პორტების ფილტრაცია Whitelist / Blacklist წესების მიხედვით.
 
-##  გაშვების ინსტრუქცია
-
-```bash
 python block1.py
