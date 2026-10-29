@@ -1,0 +1,18 @@
+[
+    {"ip_type": "any", "port": 23, "protocol": "TCP", "action": "DENY"},
+    {"ip_type": "Private", "port": 22, "protocol": "TCP", "action": "ALLOW"},
+    {"ip_type": "Public", "port": 22, "protocol": "TCP", "action": "DENY"},
+    {"ip_type": "any", "port": 80, "protocol": "TCP", "action": "ALLOW"},
+    {"ip_type": "any", "port": 443, "protocol": "TCP", "action": "ALLOW"},
+    {"ip_type": "any", "port": 53, "protocol": "UDP", "action": "ALLOW"},
+    {"ip_type": "any", "port": 21, "protocol": "TCP", "action": "DENY"},
+    {"ip_type": "any", "port": 110, "protocol": "TCP", "action": "DENY"},
+    {"ip_type": "any", "port": 143, "protocol": "TCP", "action": "DENY"},
+    {"ip_type": "any", "port": 993, "protocol": "TCP", "action": "ALLOW"},
+    {"ip_type": "any", "port": 995, "protocol": "TCP", "action": "ALLOW"},
+    {"ip_type": "any", "port": 123, "protocol": "UDP", "action": "ALLOW"},
+    {"ip_type": "Private", "port": 67, "protocol": "UDP", "action": "ALLOW"},
+    {"ip_type": "Private", "port": 3389, "protocol": "TCP", "action": "ALLOW"},
+    {"ip_type": "Private", "port": 3306, "protocol": "TCP", "action": "ALLOW"},
+    {"ip_type": "Public", "port": 445, "protocol": "TCP", "action": "DENY"}
+]
