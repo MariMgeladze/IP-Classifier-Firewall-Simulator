@@ -1,42 +1,6 @@
-
-#წესები
-rule1 = {
-    "ip_type": "any",
-    "port": 23,
-    "protocol": "TCP",
-    "action": "DENY"
-}
-rule2 = {
-    "ip_type": "Private",
-    "port": 22,
-    "protocol": "TCP",
-    "action": "ALLOW"
-}
-rule3 = {
-    "ip_type": "Public",
-    "port": 22,
-    "protocol": "TCP",
-    "action": "DENY"
-}
-rule4 = {
-    "ip_type": "any",
-    "port": 80,
-    "protocol": "TCP",
-    "action": "ALLOW"
-}
-rule5 = {
-    "ip_type": "any",
-    "port": 443,
-    "protocol": "TCP",
-    "action": "ALLOW"
-}
-rule6 = {
-    "ip_type": "any",
-    "port": 53,
-    "protocol": "UDP",
-    "action": "ALLOW"
-}
-rules = [rule1, rule2, rule3, rule4, rule5, rule6]
+import json
+with open("rules.json", "r", encoding="utf-8") as rules:
+    rules = json.load(rules)
 
 #პორტის შემოწმება
 
@@ -94,4 +58,4 @@ for rule in rules:
         break
 
 if found == False:
-    print("Result: DENY")
+    print("Result: DEFAULT DENY")
