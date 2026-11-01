@@ -1,4 +1,9 @@
 import json
+import os
+
+if not os.path.exists("rules.json"):
+    print("rules.json not found")
+    exit()
 with open("rules.json", "r", encoding="utf-8") as rules:
     rules = json.load(rules)
 
