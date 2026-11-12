@@ -2,12 +2,11 @@
 address = input("enter IP address: ") #მომხმარებელს სთხოვს შეიყვანოს IP მისამართი
 parts = address.split(".") #ამის შემდეგ parts ხდება IP მისამართის ცალ-ცალკე ნაწილი
 
-if len(parts) != 4: #ამოწმებს, რომ IP მისამართი შედგება 4 ნაწილისგან
-    print("არასწორი ფორმატის IP მისამართი") #თუ არა, გამოაქვს შეტყობინება
-elif parts[0].isdigit(): # ეს გამორიცხავს,რომ პირველი ოქტეტი არ იყოს ციფრი
+if len(parts) == 4 and all(p.isdigit() and 0 <= int(p) <= 255 for p in parts): #ამოწმებს, რომ IP მისამართი შედგება 4 ნაწილისგან და ოთხივე ციფრია
+
     first_octet = int(parts[0])
     second_octet = int(parts[1])
-    #print(first_octet) თუ ჩავრთავთ ამ ფუნქციას,გამოიტანს ასევე პირველი ოქტეტის ციფრს
+#print(first_octet) თუ ჩავრთავთ ამ ფუნქციას,გამოიტანს ასევე პირველი ოქტეტის ციფრს
  
 #ვამოწმებთ კლასებს, რომელშიც შედის IP მისამართი
 
@@ -28,16 +27,19 @@ elif parts[0].isdigit(): # ეს გამორიცხავს,რომ �
         
 #private and public IP მისამართის დადგენა
          
-if first_octet == 10:
-    print("Private IP")
-elif first_octet == 172 and second_octet >= 16 and second_octet <= 31:
-    print("Private IP")
-elif first_octet == 192 and second_octet == 168:
-    print("Private IP")
-elif first_octet == 127:
-    print("Loopback")
+    if first_octet == 10:
+        print("Private IP")
+    elif first_octet == 172 and second_octet >= 16 and second_octet <= 31:
+        print("Private IP")
+    elif first_octet == 192 and second_octet == 168:
+        print("Private IP")
+    elif first_octet == 127:
+        print("Loopback")
+    else:
+        print("Public IP")  
+    
 else:
-    print("Public IP")    
+    print("invalid IP")   
         
           
     
