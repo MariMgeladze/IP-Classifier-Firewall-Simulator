@@ -21,6 +21,8 @@ elif parts[0].isdigit(): # ეს გამორიცხავს,რომ �
         print("IP class is D")
     elif first_octet >= 240 and first_octet <= 255:
         print("IP class is E")
+    elif first_octet == 127:
+        print("Loopback address (special, refers to this device)")
     else:
         print("არასწორი ფორმატის IP მისამართი")  
         
@@ -32,6 +34,8 @@ elif first_octet == 172 and second_octet >= 16 and second_octet <= 31:
     print("Private IP")
 elif first_octet == 192 and second_octet == 168:
     print("Private IP")
+elif first_octet == 127:
+    print("Loopback")
 else:
     print("Public IP")    
         

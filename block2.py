@@ -4,8 +4,8 @@ import os
 if not os.path.exists("rules.json"):
     print("rules.json not found")
     exit()
-with open("rules.json", "r", encoding="utf-8") as rules:
-    rules = json.load(rules)
+with open("rules.json", "r", encoding="utf-8") as file:
+    rules = json.load(file)
 
 #პორტის შემოწმება
 
@@ -54,7 +54,7 @@ print("IP Type: ", ip_type)
 
 #წესების შემოწმება   
     
-found = False
+found = False #აქ არცერთი წესი არ არის ნაპოვნი, ამიტომ false
 
 for rule in rules:
     if (rule["ip_type"] == "any" or rule["ip_type"] == ip_type) and rule["port"] == port and rule["protocol"] == protocol:
