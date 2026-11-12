@@ -1,9 +1,10 @@
 import json
 import os
-
+#ვამოწმებთ არსებობს თუ არა rules.json ფაილი
 if not os.path.exists("rules.json"):
     print("rules.json not found")
     exit()
+#ვხსნით ფაილს და ვკითხულობთ მასში არსებულ წესებს
 with open("rules.json", "r", encoding="utf-8") as file:
     rules = json.load(file)
 
