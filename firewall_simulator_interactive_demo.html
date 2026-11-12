@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IP Classifier & Firewall Simulator - Live Demo</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --accent: #38bdf8;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --allow-bg: rgba(34, 197, 94, 0.15);
+      --allow-border: #22c55e;
+      --allow-text: #4ade80;
+      --deny-bg: rgba(239, 68, 68, 0.15);
+      --deny-border: #ef4444;
+      --deny-text: #f87171;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 980px;
+      width: 100%;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      color: var(--accent);
+      font-size: 26px;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: #161f30;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #0f172a;
+      border-color: var(--accent);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin-bottom: 14px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    button.btn {
+      padding: 10px 18px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #0284c7;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #0369a1;
+    }
+
+    .btn-preset {
+      background: #334155;
+      color: #cbd5e1;
+    }
+    .btn-preset:hover {
+      background: #475569;
+      color: white;
+    }
+
+    .result-box {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 15px;
+      display: none;
+      line-height: 1.6;
+    }
+
+    .result-allow {
+      background: var(--allow-bg);
+      border: 1px solid var(--allow-border);
+      color: var(--allow-text);
+    }
+
+    .result-deny {
+      background: var(--deny-bg);
+      border: 1px solid var(--deny-border);
+      color: var(--deny-text);
+    }
+
+    .result-info {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid var(--accent);
+      color: #bae6fd;
+    }
+
+    .diag-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .diag-item {
+      background: #0f172a;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .diag-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .diag-val {
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: #0f172a;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    tr.active-rule {
+      background: rgba(56, 189, 248, 0.22) !important;
+      outline: 2px solid var(--accent);
+    }
+
+    .tag-allow {
+      color: var(--allow-text);
+      font-weight: bold;
+    }
+    .tag-deny {
+      color: var(--deny-text);
+      font-weight: bold;
+    }
+
+    .badge-pipeline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #0f172a;
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 12px;
+      color: var(--accent);
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+
+    .rule-principles {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .principle-card {
+      background: #0f172a;
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .principle-title {
+      font-weight: bold;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🛡️ IP Classifier & Firewall Simulator</h1>
+    <div class="subtitle">ინტერაქტიული დემონსტრაცია (კიბერუსაფრთხოების სიმულატორი)</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(event, 'tab-unified')">🔗 გაერთიანებული Pipeline (Block 1 + 2)</button>
+    <button class="tab-btn" onclick="switchTab(event, 'tab-block1')">📦 Block 1: IP Classifier</button>
+    <button class="tab-btn" onclick="switchTab(event, 'tab-block2')">🔥 Block 2: Firewall Simulator</button>
+  </div>
+
+  <!-- TAB 1: UNIFIED -->
+  <div id="tab-unified" class="tab-content active">
+    <div class="card">
+      <div class="badge-pipeline">⚙️ სრული ნაკადი: შეყვანა ➔ ვალიდაცია ➔ კლასიფიკაცია ➔ ფაირვოლის გადაწყვეტილება</div>
+      <h2>პაკეტის შემოწმება ორთავე მოდულის გავლით</h2>
+
+      <div class="btn-group">
+        <button class="btn btn-preset" onclick="setUnifiedPreset('192.168.1.5', 22, 'TCP')">SSH Private #2</button>
+        <button class="btn btn-preset" onclick="setUnifiedPreset('8.8.8.8', 22, 'TCP')">SSH Public #3</button>
+        <button class="btn btn-preset" onclick="setUnifiedPreset('8.8.8.8', 53, 'UDP')">DNS UDP #6</button>
+        <button class="btn btn-preset" onclick="setUnifiedPreset('1.1.1.1', 8080, 'TCP')">უცნობი 8080</button>
+        <button class="btn btn-preset" onclick="setUnifiedPreset('300.1.1.1', 80, 'TCP')">Invalid IP</button>
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label>IP მისამართი</label>
+          <input type="text" id="uniIp" value="192.168.1.5" placeholder="მაგ: 192.168.1.5">
+        </div>
+        <div>
+          <label>პორტი (0-65535)</label>
+          <input type="number" id="uniPort" value="22" min="0" max="65535">
+        </div>
+        <div>
+          <label>პროტოკოლი</label>
+          <select id="uniProto">
+            <option value="TCP">TCP</option>
+            <option value="UDP">UDP</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="runUnified()">🚀 გაუშვი სრული სიმულაცია</button>
+
+      <div id="uniResultBox" class="result-box"></div>
+    </div>
+  </div>
+
+  <!-- TAB 2: BLOCK 1 ALONE -->
+  <div id="tab-block1" class="tab-content">
+    <div class="card">
+      <h2>📦 Block 1: IP მისამართის ანალიზატორი (IP Classifier)</h2>
+      <p style="color: var(--muted); font-size: 13px; margin-bottom: 16px;">
+        ამოწმებს IPv4 მისამართის ვალიდურობას (4 ოქტეტი, 0-255), ადგენს კლასს (A, B, C, D, E) და Private/Public ტიპს RFC 1918 სტანდარტით.
+      </p>
+
+      <div class="btn-group">
+        <button class="btn btn-preset" onclick="setB1('10.50.1.1')">10.50.1.1 (Class A, Private)</button>
+        <button class="btn btn-preset" onclick="setB1('172.20.10.5')">172.20.10.5 (Class B, Private)</button>
+        <button class="btn btn-preset" onclick="setB1('192.168.1.1')">192.168.1.1 (Class C, Private)</button>
+        <button class="btn btn-preset" onclick="setB1('8.8.8.8')">8.8.8.8 (Class A, Public)</button>
+        <button class="btn btn-preset" onclick="setB1('224.0.0.1')">224.0.0.1 (Class D)</button>
+        <button class="btn btn-preset" onclick="setB1('127.0.0.1')">127.0.0.1 (Loopback)</button>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+        <input type="text" id="b1Ip" value="192.168.1.5" style="max-width: 320px;" placeholder="ჩაწერე IP...">
+        <button class="btn btn-primary" onclick="runBlock1()">კლასიფიკაცია</button>
+      </div>
+
+      <div id="b1ResultBox" class="result-box"></div>
+    </div>
+  </div>
+
+  <!-- TAB 3: BLOCK 2 RULES & TABLE -->
+  <div id="tab-block2" class="tab-content">
+    <div class="card">
+      <h2>🔥 Block 2: ფაირვოლის 16 წესი (rules.json)</h2>
+      <p style="color: var(--muted); font-size: 13px; margin-bottom: 14px;">
+        ფაირვოლის წესები. მოქმედებს <strong>First Match</strong> (პირველივე დამთხვევა) და <strong>Default Deny</strong> პოლიტიკა.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>სერვისი / წესის სახელი</th>
+            <th>IP ტიპი</th>
+            <th>პორტი</th>
+            <th>ოქმი</th>
+            <th>მოქმედება</th>
+          </tr>
+        </thead>
+        <tbody id="rulesTableBody"></tbody>
+      </table>
+
+      <div class="rule-principles">
+        <div class="principle-card">
+          <div class="principle-title">🎯 First Match პრინციპი</div>
+          წესები მოწმდება მკაცრი რიგითობით ზემოდან ქვემოთ (#1-დან #16-მდე). პირველივე დამთხვევა იღებს გადაწყვეტილებას.
+        </div>
+        <div class="principle-card">
+          <div class="principle-title">⛔ Default Deny პრინციპი</div>
+          თუ მოთხოვნა ვერცერთ წესში ვერ ჩაჯდა, უსაფრთხოების მიზნით სისტემა მას უპირობოდ ბლოკავს (Zero Trust).
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// 16 Rules exactly as requested
+const rules = [
+  {"id": 1, "name": "Telnet", "ip_type": "any", "port": 23, "protocol": "TCP", "action": "DENY"},
+  {"id": 2, "name": "Internal SSH", "ip_type": "Private", "port": 22, "protocol": "TCP", "action": "ALLOW"},
+  {"id": 3, "name": "Public SSH", "ip_type": "Public", "port": 22, "protocol": "TCP", "action": "DENY"},
+  {"id": 4, "name": "HTTP", "ip_type": "any", "port": 80, "protocol": "TCP", "action": "ALLOW"},
+  {"id": 5, "name": "HTTPS", "ip_type": "any", "port": 443, "protocol": "TCP", "action": "ALLOW"},
+  {"id": 6, "name": "DNS", "ip_type": "any", "port": 53, "protocol": "UDP", "action": "ALLOW"},
+  {"id": 7, "name": "FTP", "ip_type": "any", "port": 21, "protocol": "TCP", "action": "DENY"},
+  {"id": 8, "name": "POP3", "ip_type": "any", "port": 110, "protocol": "TCP", "action": "DENY"},
+  {"id": 9, "name": "IMAP", "ip_type": "any", "port": 143, "protocol": "TCP", "action": "DENY"},
+  {"id": 10, "name": "IMAPS", "ip_type": "any", "port": 993, "protocol": "TCP", "action": "ALLOW"},
+  {"id": 11, "name": "POP3S", "ip_type": "any", "port": 995, "protocol": "TCP", "action": "ALLOW"},
+  {"id": 12, "name": "NTP", "ip_type": "any", "port": 123, "protocol": "UDP", "action": "ALLOW"},
+  {"id": 13, "name": "DHCP", "ip_type": "Private", "port": 67, "protocol": "UDP", "action": "ALLOW"},
+  {"id": 14, "name": "RDP", "ip_type": "Private", "port": 3389, "protocol": "TCP", "action": "ALLOW"},
+  {"id": 15, "name": "MySQL", "ip_type": "Private", "port": 3306, "protocol": "TCP", "action": "ALLOW"},
+  {"id": 16, "name": "SMB", "ip_type": "Public", "port": 445, "protocol": "TCP", "action": "DENY"}
+];
+
+function switchTab(evt, tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  if (evt && evt.currentTarget) {
+    evt.currentTarget.classList.add('active');
+  }
+  document.getElementById(tabId).classList.add('active');
+}
+
+// BLOCK 1 CORE LOGIC
+function classifyIp(ipStr) {
+  const rawParts = ipStr.trim().split('.');
+  
+  if (rawParts.length !== 4) {
+    return { valid: false, error: "IP უნდა შეიცავდეს ზუსტად 4 ოქტეტს (მაგ: 192.168.1.1)" };
+  }
+  
+  const parts = [];
+  for (let p of rawParts) {
+    if (p === "" || isNaN(p) || p.includes(" ")) return { valid: false, error: `ოქტეტი არ არის ვალიდური ციფრი` };
+    const num = Number(p);
+    if (!Number.isInteger(num) || num < 0 || num > 255) {
+      return { valid: false, error: `ოქტეტი ${num} სცდება დასაშვებ დიაპაზონს (0 - 255)` };
+    }
+    parts.push(num);
+  }
+
+  const [o1, o2] = parts;
+
+  // Class
+  let ipClass = "უცნობი";
+  if (o1 >= 1 && o1 <= 126) ipClass = "Class A";
+  else if (o1 === 127) ipClass = "Loopback";
+  else if (o1 >= 128 && o1 <= 191) ipClass = "Class B";
+  else if (o1 >= 192 && o1 <= 223) ipClass = "Class C";
+  else if (o1 >= 224 && o1 <= 239) ipClass = "Class D";
+  else if (o1 >= 240 && o1 <= 255) ipClass = "Class E";
+
+  // Private (RFC 1918)
+  let isPrivate = false;
+  if (o1 === 10) isPrivate = true;
+  else if (o1 === 172 && o2 >= 16 && o2 <= 31) isPrivate = true;
+  else if (o1 === 192 && o2 === 168) isPrivate = true;
+
+  const type = (o1 === 127) ? "Localhost" : (isPrivate ? "Private" : "Public");
+
+  return {
+    valid: true,
+    ip: ipStr,
+    octets: parts,
+    ipClass,
+    type,
+    isPrivate,
+    rawType: isPrivate ? "Private" : "Public"
+  };
+}
+
+// TAB 1 UNIFIED RUNNER
+function runUnified() {
+  const ip = document.getElementById('uniIp').value;
+  const portInput = document.getElementById('uniPort').value;
+  const port = parseInt(portInput, 10);
+  const proto = document.getElementById('uniProto').value.toUpperCase();
+  const box = document.getElementById('uniResultBox');
+
+  // Port Validation
+  if (isNaN(port) || port < 0 || port > 65535) {
+    box.style.display = 'block';
+    box.className = 'result-box result-deny';
+    box.innerHTML = `<strong>❌ შეცდომა (ვალიდაცია):</strong> პორტი უნდა იყოს 0-დან 65535-მდე`;
+    return;
+  }
+
+  // Block 1 execution
+  const b1 = classifyIp(ip);
+  if (!b1.valid) {
+    box.style.display = 'block';
+    box.className = 'result-box result-deny';
+    box.innerHTML = `<strong>❌ Block 1 შეცდომა (ვალიდაცია):</strong> ${b1.error}`;
+    return;
+  }
+
+  // Block 2 matching
+  let matched = null;
+  for (let r of rules) {
+    const pMatch = (r.port === port);
+    const prMatch = (r.protocol === proto);
+    const ipMatch = (r.ip_type === "any" || r.ip_type === b1.rawType);
+    if (pMatch && prMatch && ipMatch) {
+      matched = r;
+      break; // FIRST MATCH
+    }
+  }
+
+  box.style.display = 'block';
+  const isAllow = matched && matched.action === "ALLOW";
+  box.className = `result-box ${isAllow ? 'result-allow' : 'result-deny'}`;
+
+  let verdictHtml = "";
+  if (matched) {
+    verdictHtml = `
+      <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">
+        ${isAllow ? '✅ გადაწყვეტილება: ALLOW' : '❌ გადაწყვეტილება: DENY'}
+      </div>
+      <div><strong>ამოქმედებული წესი:</strong> წესი №${matched.id} — "${matched.name}" (First Match)</div>
+    `;
+  } else {
+    verdictHtml = `
+      <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">
+        ❌ გადაწყვეტილება: DENY
+      </div>
+      <div><strong>მიზეზი:</strong> არცერთი წესი არ დაემთხვა ➔ ამოქმედდა <strong>Default Deny</strong></div>
+    `;
+  }
+
+  box.innerHTML = `
+    ${verdictHtml}
+    <div class="diag-grid">
+      <div class="diag-item">
+        <div class="diag-label">Block 1: IP მისამართი</div>
+        <div class="diag-val">${b1.ip}</div>
+      </div>
+      <div class="diag-item">
+        <div class="diag-label">Block 1: კლასი</div>
+        <div class="diag-val">${b1.ipClass}</div>
+      </div>
+      <div class="diag-item">
+        <div class="diag-label">Block 1: IP ტიპი</div>
+        <div class="diag-val">${b1.rawType}</div>
+      </div>
+      <div class="diag-item">
+        <div class="diag-label">Block 2: პორტი & ოქმი</div>
+        <div class="diag-val">${port} / ${proto}</div>
+      </div>
+    </div>
+  `;
+}
+
+function setUnifiedPreset(ip, port, proto) {
+  document.getElementById('uniIp').value = ip;
+  document.getElementById('uniPort').value = port;
+  document.getElementById('uniProto').value = proto;
+  runUnified();
+}
+
+// TAB 2 BLOCK 1 RUNNER
+function runBlock1() {
+  const ip = document.getElementById('b1Ip').value;
+  const box = document.getElementById('b1ResultBox');
+  const res = classifyIp(ip);
+
+  box.style.display = 'block';
+  if (!res.valid) {
+    box.className = 'result-box result-deny';
+    box.innerHTML = `<strong>❌ ვალიდაციის შეცდომა:</strong> ${res.error}`;
+    return;
+  }
+
+  box.className = 'result-box result-info';
+  box.innerHTML = `
+    <div style="font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #38bdf8;">
+      ✔️ IP ვალიდურია: ${res.ip}
+    </div>
+    <div class="diag-grid">
+      <div class="diag-item">
+        <div class="diag-label">ოქტეტები (4 ნაწილი)</div>
+        <div class="diag-val">${res.octets.join(' . ')}</div>
+      </div>
+      <div class="diag-item">
+        <div class="diag-label">კლასი (Classful)</div>
+        <div class="diag-val">${res.ipClass}</div>
+      </div>
+      <div class="diag-item">
+        <div class="diag-label">ტიპი (RFC 1918)</div>
+        <div class="diag-val">${res.type}</div>
+      </div>
+    </div>
+  `;
+}
+
+function setB1(ip) {
+  document.getElementById('b1Ip').value = ip;
+  runBlock1();
+}
+
+// RENDER BLOCK 2 TABLE
+function renderRulesTable() {
+  const tbody = document.getElementById('rulesTableBody');
+  tbody.innerHTML = rules.map(r => `
+    <tr>
+      <td>${r.id}</td>
+      <td>${r.name}</td>
+      <td><strong>${r.ip_type}</strong></td>
+      <td>${r.port}</td>
+      <td>${r.protocol}</td>
+      <td class="${r.action === 'ALLOW' ? 'tag-allow' : 'tag-deny'}">${r.action}</td>
+    </tr>
+  `).join('');
+}
+
+window.onload = function() {
+  renderRulesTable();
+  runUnified();
+};
+</script>
+
+</body>
+</html>
