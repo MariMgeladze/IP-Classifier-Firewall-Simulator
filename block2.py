@@ -10,7 +10,7 @@ with open("rules.json", "r", encoding="utf-8") as file:
 #პორტის შემოწმება
 
 port = input("enter port: ") #ცვლადში ჩნდება ტექსტად
-if port.isdigit():  #ამოწმებს თუ არის რიცხვები
+if port.isdigit() and 0 <= int(port) <= 65535:  #ამოწმებს თუ არის რიცხვები და შესაძლო პორტების დიაპაზონში
     port = int(port) #თუ ციფრებია ცვლადი რიცხვად გადაიქცევა
 else: 
     print("invalid port" ) #თუ არა და  არ გაეშვება
@@ -30,11 +30,7 @@ else:
 address = input("enter IP address: ")
 parts = address.split(".")
 
-if len(parts) != 4:
-    print("invalid IP")
-    exit()
-
-if not (parts[0].isdigit() and parts[1].isdigit()):
+if len(parts) != 4 or not all(p.isdigit() and 0 <= int(p) <= 255 for p in parts):
     print("invalid IP")
     exit()
 
